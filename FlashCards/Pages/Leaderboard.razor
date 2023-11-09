@@ -1,0 +1,47 @@
+﻿@page "/leaderboard"
+@using FlashCards.Model
+
+<PageTitle>Leaderboard - Top 100</PageTitle>
+
+<RadzenRow>
+    <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="height: 100%; width: 100%; max-width: 800px; overflow: hidden;">
+        <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-warning-light rz-p-12" style="text-align: center;">
+            <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Leaderboard - Top 100</RadzenText>
+        </RadzenCard>
+        <RadzenCard Class="rz-shadow-0 rz-p-12">
+            <RadzenDataGrid TItem="CourseScore" Data="data.OrderByDescending(x => x.Score).Take(100)" Style="height:50vh">
+                <Columns>
+                    <RadzenDataGridColumn TItem="CourseScore" Title="Place" Property="UserId">
+                        <Template>
+                            @if (data.OrderByDescending(x => x.Score).Take(3).Where(x => x == context).Count() > 0)
+                            {
+                                <strong>@(data.OrderByDescending(x => x.Score).ToList().FindIndex(x => x == context) + 1)</strong>
+                                <RadzenIcon Icon="emoji_events" />
+                            }
+                            else
+                            {
+                                @(data.OrderByDescending(x => x.Score).ToList().FindIndex(x => x == context) + 1)
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="CourseScore" Title="User" Property="UserId" />
+                    <RadzenDataGridColumn TItem="CourseScore" Title="Course" Property="CourseId" />
+                    <RadzenDataGridColumn TItem="CourseScore" Title="Score" Property="Score" />
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenCard>
+    </RadzenStack>
+</RadzenRow>
+
+@code{
+    List<CourseScore> data = new();
+
+    protected override void OnInitialized()
+    {
+        Random rndm = new();
+        for(int x = 1; x < 101; x++)
+        {
+            data.Add(new CourseScore { Score = rndm.Next(1, 30000), CourseId = x, UserId = x });
+        }
+    }
+}

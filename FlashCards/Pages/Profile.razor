@@ -1,0 +1,24 @@
+﻿@page "/profile"
+@using FlashCards.Model
+@inject NavigationManager NavManager
+@inject User _user
+@inject Data data
+
+<PageTitle>Profile</PageTitle>
+
+<RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+        <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
+            <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Welcome back @_user.UserName !</RadzenText>
+        </RadzenCard>
+        <RadzenCard Class="rz-shadow-0 rz-p-12">
+            <RadzenButton Style="width:100%" Click="Logout" ButtonStyle="ButtonStyle.Danger" Text="Logout" Icon="logout" />
+        </RadzenCard>
+</RadzenStack>
+
+@code{
+    void Logout()
+    {
+        data.UserList.Where(x => x.UserName == _user.UserName).First().AdminCommand = "kick";
+        NavManager.NavigateTo("/", true);
+    }
+}

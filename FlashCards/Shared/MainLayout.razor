@@ -1,0 +1,123 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@using FlashCards.Model
+@inject NavigationManager NavManager
+@inject User _user
+@inject Data data
+
+<PageTitle>FlashCards</PageTitle>
+
+<div style="width:100vw; height:100vh;">
+    @if(String.IsNullOrEmpty(_user.UserName))
+    {
+        <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+        @if (loginView)
+        {
+            <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-success rz-p-12" style="text-align: center;">
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Login</RadzenText>
+            </RadzenCard>
+            <RadzenCard Class="rz-shadow-0 rz-p-12">
+                <RadzenTemplateForm Data=@("SimpleLogin")>
+                    <RadzenLogin AllowResetPassword Register="@(()=> {loginView = false;})" Login="@(x => OnLogin(x))" RegisterMessageText="Don't have an account?" />
+                 </RadzenTemplateForm>
+            </RadzenCard>
+        }
+        else
+        {
+            <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-danger rz-p-12" style="text-align: center;">
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Register</RadzenText>
+            </RadzenCard>
+            <RadzenCard Class="rz-shadow-0 rz-p-12">
+                <RadzenTemplateForm Data=@("SimpleLogin") Action="http://www.google.com">
+                    <RadzenLogin LoginText="Register" Login="@(x => OnRegister(x))" AllowResetPassword="false" RegisterText="Login" Register="@(()=> {loginView = true;})" RegisterMessageText="Already have an account?" />
+                </RadzenTemplateForm>
+            </RadzenCard>
+        }
+        </RadzenStack>
+    }
+    else
+    {
+        <RadzenMenu Style="width:100vw; height:4vh">
+            <RadzenMenuItem Text="Home" Path="" Icon="home" />
+            <RadzenMenuItem Text="Gamemodes" Path="gamemodes" Icon="videogame_asset" />
+            <RadzenMenuItem Text="Leaderboard" Path="leaderboard" Icon="leaderboard" />
+            @if(_user.UserName.ToUpper() == "ADMIN")
+            {
+                <RadzenMenuItem Text="Admin" Path="admin" Icon="admin_panel_settings" />
+            }
+            <RadzenMenuItem Text="Profile" Path="profile" Icon="person" />
+        </RadzenMenu>
+        <div style="width:100vw; height:96vh">
+            @Body
+        </div>
+    }
+    <RadzenComponents />
+</div>
+
+@code {
+    bool rememberMe = true;
+    bool loginView = true;
+    System.Threading.Timer? timer;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        timer = new System.Threading.Timer(async _ =>  // async void
+        {
+            await InvokeAsync(CheckUserStatus);
+        }, null, 0, 1000);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    void CheckUserStatus()
+    {
+        if(!String.IsNullOrEmpty(_user.UserName))
+        {
+            try
+            {
+                string adminCommand = data.UserList.Where(x => x.UserName == _user.UserName).First().AdminCommand;
+                if (!String.IsNullOrEmpty(adminCommand))
+                {
+                    switch (adminCommand)
+                    {
+                        case "kick":
+                            data.UserList.RemoveAll(x => x.UserName == _user.UserName);
+                            NavManager.NavigateTo("/", true);
+                            break;
+                    }
+                    StateHasChanged();
+                }
+            }
+            catch { }
+        }
+    }
+
+    void OnLogin(LoginArgs args)
+    {
+        if (data.UserList.Where(x => x.UserName == args.Username).Count() > 0)
+        {
+
+        }
+        else
+        {
+            data.UserList.Add(new User { UserName = args.Username });
+            _user.UserName = args.Username;
+
+        }
+    }
+
+    void OnRegister(LoginArgs args)
+    {
+        
+    }
+
+    void OnResetPassword(string value, string name)
+    {
+
+    }
+
+    public void Dispose()
+    {
+        data.UserList.RemoveAll(x => x.UserName == _user.UserName);
+        timer?.Dispose();
+    }
+}

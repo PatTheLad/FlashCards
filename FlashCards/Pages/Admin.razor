@@ -1,0 +1,57 @@
+﻿@page "/admin"
+@using FlashCards.Model
+@using FlashCards
+@implements IDisposable
+@inject Data _data
+@inject User _user
+
+<PageTitle>Admin</PageTitle>
+
+@if(_user.UserName.ToUpper() == "ADMIN")
+{
+    <RadzenDataGrid @ref=dataGrid TItem="User" AllowFiltering AllowColumnResize AllowSorting Data="_data.UserList" Style="width:100%; height:100%">
+         <Columns>
+             <RadzenDataGridColumn TItem="User" Property="Id" Title="ID" />
+             <RadzenDataGridColumn TItem="User" Property="UserName" Title="UserName" />
+             <RadzenDataGridColumn TItem="User" Property="Game" Title="Game" />
+             <RadzenDataGridColumn TItem="User" Property="Lobby" Title="Lobby" />
+             <RadzenDataGridColumn TItem="User" Property="Id" Title="Kick">
+                 <Template>
+                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Click="@(() => SetAdminCommand("kick", context))" />
+                 </Template>
+             </RadzenDataGridColumn>
+         </Columns>
+     </RadzenDataGrid>
+}
+
+ @code{
+    System.Threading.Timer? timer;
+    RadzenDataGrid<User> dataGrid = new();
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        timer = new System.Threading.Timer(async _ =>  // async void
+        {
+            if (dataGrid != null)
+            {
+                await InvokeAsync(dataGrid.Reload);
+            }
+        }, null, 0, 1000);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    void SetAdminCommand(string command, User user)
+    {
+        switch (command)
+        {
+            case "kick":
+                _data.UserList.Where(x => x.UserName == user.UserName).First().AdminCommand = command;
+                break;
+        }
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}
