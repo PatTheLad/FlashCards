@@ -7,65 +7,51 @@
 
 <PageTitle>Gamemodes</PageTitle>
 
-@if (_user.Lobby == 0 && String.IsNullOrEmpty(_user.Game))
-{
-    <RadzenRow>
-        <RadzenButton Click="@(()=> OnGameSelection("race"))" Class="rz-my-12 rz-mx-auto rz-border-radius-6" Variant="Variant.Text">
-            <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-                <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
-                    <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Race</RadzenText>
-                </RadzenCard>
-                <RadzenCard Class="rz-shadow-0 rz-p-12">
-                    Race Mode is a heart-pounding, time-driven competition that puts your knowledge and speed to the test.<br />
-                    Challenge a random opponent or invite a friend for an adrenaline-pumping showdown. <br />
-                    As the clock ticks, you'll race to answer flash card questions correctly, striving to outpace your opponent. <br />
-                    The first player to answer all questions wins the race! Are you quick enough to claim victory in this high-speed battle of wits?
-                </RadzenCard>
-            </RadzenStack>
-        </RadzenButton>
+<RadzenRow>
+    <RadzenButton Click="@(()=> OnGameSelection("race"))" Class="rz-my-12 rz-mx-auto rz-border-radius-6" Variant="Variant.Text">
+        <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+            <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Race</RadzenText>
+            </RadzenCard>
+            <RadzenCard Class="rz-shadow-0 rz-p-12">
+                Race Mode is a heart-pounding, time-driven competition that puts your knowledge and speed to the test.<br />
+                Challenge a random opponent or invite a friend for an adrenaline-pumping showdown. <br />
+                As the clock ticks, you'll race to answer flash card questions correctly, striving to outpace your opponent. <br />
+                The first player to answer all questions wins the race! Are you quick enough to claim victory in this high-speed battle of wits?
+            </RadzenCard>
+        </RadzenStack>
+    </RadzenButton>
 
-        <RadzenButton Click="@(()=> OnGameSelection("deathmatch"))" Class="rz-my-12 rz-mx-auto rz-border-radius-6" Variant="Variant.Text">
-            <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-                <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-danger rz-p-12" style="text-align: center;">
-                    <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Deathmatch</RadzenText>
-                </RadzenCard>
-                <RadzenCard Class="rz-shadow-0 rz-p-12">
-                    Deathmatch Mode takes flash card gaming to the extreme, where a wrong answer could spell your demise. <br />
-                    Face off against opponents and try to outlast them in this thrilling elimination-style competition. <br />
-                    As questions flash before you, answer with precision – one wrong move, and you're out of the game! <br />
-                    The last player standing is the ultimate flash card champion. Can you stay sharp and eliminate your rivals to claim victory in the Deathmatch?
-                </RadzenCard>
-            </RadzenStack>
-        </RadzenButton>
+    <RadzenButton Click="@(()=> OnGameSelection("deathmatch"))" Class="rz-my-12 rz-mx-auto rz-border-radius-6" Variant="Variant.Text">
+        <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+            <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-danger rz-p-12" style="text-align: center;">
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Deathmatch</RadzenText>
+            </RadzenCard>
+            <RadzenCard Class="rz-shadow-0 rz-p-12">
+                Deathmatch Mode takes flash card gaming to the extreme, where a wrong answer could spell your demise. <br />
+                Face off against opponents and try to outlast them in this thrilling elimination-style competition. <br />
+                As questions flash before you, answer with precision – one wrong move, and you're out of the game! <br />
+                The last player standing is the ultimate flash card champion. Can you stay sharp and eliminate your rivals to claim victory in the Deathmatch?
+            </RadzenCard>
+        </RadzenStack>
+    </RadzenButton>
 
-        <RadzenButton Click="@(()=> OnGameSelection("coop"))" Class="rz-my-12 rz-mx-auto rz-border-radius-6" Variant="Variant.Text">
-            <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-                <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-success rz-p-12" style="text-align: center;">
-                    <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Co-op Mode</RadzenText>
-                </RadzenCard>
-                <RadzenCard Class="rz-shadow-0 rz-p-12">
-                    Co-op Mode, team up with a friend to tackle a series of increasingly difficult flash card questions within a time limit. <br />
-                    To succeed, you'll need to work together, strategize, and communicate effectively to achieve the highest score and progress as far as possible. <br />
-                    Can you and your partner conquer the Co-op Challenge and prove your collaborative skills?
-                </RadzenCard>
-            </RadzenStack>
-        </RadzenButton>
-    </RadzenRow>
-}
-else
-{
-    <RadzenStack AlignItems="AlignItems.Center" Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
-        <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center;">
-            <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Searching for a lobby</RadzenText>
-        </RadzenCard>
-        <RadzenCard Class="rz-shadow-0 rz-p-12">
-            <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
-        </RadzenCard>
-    </RadzenStack>
-}
+    <RadzenButton Click="@(()=> OnGameSelection("coop"))" Class="rz-my-12 rz-mx-auto rz-border-radius-6" Variant="Variant.Text">
+        <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 400px; overflow: hidden;">
+            <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-success rz-p-12" style="text-align: center;">
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Co-op Mode</RadzenText>
+            </RadzenCard>
+            <RadzenCard Class="rz-shadow-0 rz-p-12">
+                Co-op Mode, team up with a friend to tackle a series of increasingly difficult flash card questions within a time limit. <br />
+                To succeed, you'll need to work together, strategize, and communicate effectively to achieve the highest score and progress as far as possible. <br />
+                Can you and your partner conquer the Co-op Challenge and prove your collaborative skills?
+            </RadzenCard>
+        </RadzenStack>
+    </RadzenButton>
+</RadzenRow>
 
 @code{
-    async Task OnGameSelection(string gameName)
+    async void OnGameSelection(string gameName)
     {
         _user.Game = gameName;
         StateHasChanged();
@@ -73,6 +59,7 @@ else
         data.UserList.RemoveAll(x => x.UserName == _user.UserName);
         data.UserList.Add(_user);
         await SearchForLobby(gameName);
+        StateHasChanged();
     }
 
     async Task SearchForLobby(string gameName)
@@ -119,6 +106,7 @@ else
                 NavigationManager.NavigateTo("/gamemodes/race");
                 break;
         }
+        await Task.CompletedTask;
     }
 
     public void Dispose()

@@ -55,7 +55,6 @@
 </div>
 
 @code {
-    bool rememberMe = true;
     bool loginView = true;
     System.Threading.Timer? timer;
 
@@ -74,7 +73,7 @@
         {
             try
             {
-                string adminCommand = data.UserList.Where(x => x.UserName == _user.UserName).First().AdminCommand;
+                string? adminCommand = data.UserList.Where(x => x.UserName == _user.UserName).First().AdminCommand;
                 if (!String.IsNullOrEmpty(adminCommand))
                 {
                     switch (adminCommand)

@@ -12,7 +12,7 @@
         <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center; vertical-align:central">
             @if (finished && data.UserList.Where(x => x.UserName == _user.UserName).First().Finished)
             {
-                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Congrats you are @place place!
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">You are @place place!
                     <br /> You scored @_user.Score points and got @rightAnswers out of @maxQuestions questions right!
                 </RadzenText>
             }
@@ -98,7 +98,7 @@
         {
             answersAnswered++;
             rightAnswers++;
-            _user.Score += 25;
+            _user.Score += Math.Round(5 * timerFrontEnd, 0);
             message = new() { Severity = NotificationSeverity.Success, Summary = "Right Answer", Detail = "Great job!", Duration = 2000 };
         }
         else
@@ -114,7 +114,7 @@
             {
                 SetPlace();
                 finished = true;
-                elapsedTime.Dispose();
+                elapsedTime?.Dispose();
             }
 
         }
