@@ -11,6 +11,15 @@
             <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">Welcome back @_user.UserName !</RadzenText>
         </RadzenCard>
         <RadzenCard Class="rz-shadow-0 rz-p-12">
+            <RadzenFormField Text="Username" Style="width: 100%;">
+                <RadzenNumeric @bind-Value="_user.UserName" Disabled Style="width: 100%;" />
+            </RadzenFormField>
+            <RadzenFormField Text="E-Mail" Style="width: 100%;">
+                <RadzenTextBox @bind-Value="_user.Email" Style="width: 100%;" />
+            </RadzenFormField>
+            <RadzenFormField Text="ID" Style="width: 100%;">
+                <RadzenNumeric @bind-Value="_user.Id" Disabled Style="width: 100%;" />
+            </RadzenFormField>
             <RadzenButton Style="width:100%" Click="Logout" ButtonStyle="ButtonStyle.Danger" Text="Logout" Icon="logout" />
         </RadzenCard>
 </RadzenStack>
