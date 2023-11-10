@@ -3,29 +3,62 @@
 @using FlashCards.Model
 @inject User _user
 @inject Data data
+@inject NotificationService NotificationService
 
 <PageTitle>Co-op</PageTitle>
 
 <RadzenRow>
     <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="height: 80vh; width: 100%; max-width: 800px; overflow: hidden;">
         <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-success rz-p-12" style="text-align: center; vertical-align:central">
-            <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">@question</RadzenText>
-        </RadzenCard>
-        <RadzenCard Class="rz-shadow-0 rz-p-12" Style="text-align:center; height:100%">
-            @if (countdown)
+            @if (finished && data.UserList.Where(x => x.UserName == _user.UserName).First().Finished)
             {
-                <strong style="font-size:500%">@countdownText</strong>
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">You are @place place!
+                    <br /> You scored @_user.Score points and got @rightAnswers out of @maxQuestions questions right!
+                </RadzenText>
+            }
+            else if ( data.UserList.Where(x => x.UserName == _user.UserName).First().Finished)
+            {
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">
+                    Waiting for your opponent...
+                </RadzenText>
             }
             else
             {
-                <RadzenRow Gap="4%" Style="width:100%; align-content:center; height:48%; margin-bottom:4%">
-                    <RadzenButton Style="width:48%; height:100%" Text="@GetRandomAnswer()" ButtonStyle="ButtonStyle.Success" />
-                    <RadzenButton Style="width:48%; height:100%" Text="@GetRandomAnswer()" ButtonStyle="ButtonStyle.Primary" />
-                </RadzenRow>
-                <RadzenRow Gap="4%" Style="width:100%; align-content:center; height:48%">
-                    <RadzenButton Style="width:48%; height:100%" Text="@GetRandomAnswer()" ButtonStyle="ButtonStyle.Danger" />
-                    <RadzenButton Style="width:48%; height:100%" Text="@GetRandomAnswer()" ButtonStyle="ButtonStyle.Warning" />
-                </RadzenRow>
+                <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">@question</RadzenText>
+                @if (!countdown)
+                {
+                    <strong class="rz-color-white rz-mb-0">@Math.Round(timerFrontEnd, 2)</strong>
+                }
+            }
+        </RadzenCard>
+        <RadzenCard Class="rz-shadow-0 rz-p-12" Style="text-align:center; height:100%">
+            @if (finished && data.UserList.Where(x => x.UserName == _user.UserName).First().Finished)
+            {
+                
+            }
+            else if (data.UserList.Where(x => x.UserName == _user.UserName).First().Finished)
+            {
+                <RadzenStack Style="width:100%" AlignItems="AlignItems.Center">
+                    <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
+                </RadzenStack>
+            }
+            else
+            {
+                @if (countdown)
+                {
+                    <strong style="font-size:500%">@countdownText</strong>
+                }
+                else
+                {
+                    <RadzenRow Gap="4%" Style="width:100%; align-content:center; height:48%; margin-bottom:4%">
+                        <RadzenButton Style="width:48%; height:100%" Text="@answer1" ButtonStyle="ButtonStyle.Success" Click="(() => CheckAnswer(answer1))" />
+                        <RadzenButton Style="width:48%; height:100%" Text="@answer2" ButtonStyle="ButtonStyle.Primary" Click="(() => CheckAnswer(answer2))" />
+                    </RadzenRow>
+                    <RadzenRow Gap="4%" Style="width:100%; align-content:center; height:48%">
+                        <RadzenButton Style="width:48%; height:100%" Text="@answer3" ButtonStyle="ButtonStyle.Danger" Click="(() => CheckAnswer(answer3))" />
+                        <RadzenButton Style="width:48%; height:100%" Text="@answer4" ButtonStyle="ButtonStyle.Warning" Click="(() => CheckAnswer(answer4))" />
+                    </RadzenRow>
+                }
             }
         </RadzenCard>
     </RadzenStack>
@@ -33,10 +66,22 @@
 
 @code{
     bool countdown = true;
-    System.Timers.Timer? timer = new();
-    private int counter = 4;
+    bool finished = false;
+    double timerFrontEnd= 20;
+    System.Threading.Timer? elapsedTime;
+    System.Threading.Timer? timer;
+    int answersAnswered = 0;
+    int counter = 4;
+    int maxQuestions = 20;
+    int rightAnswers = 0;
+    int wrongAnswers = 0;
+    int place = 0;
     string countdownText = "Ready?";
     string question = "";
+    string answer1 = "";
+    string answer2 = "";
+    string answer3 = "";
+    string answer4 = "";
     string rightAnswer = "";
     List<string> answers = new();
 
@@ -44,6 +89,42 @@
     {
         StartTimer();
         base.OnInitialized();
+    }
+
+    void CheckAnswer(string selectedAnswer)
+    {
+        NotificationMessage message;
+        if(selectedAnswer == rightAnswer)
+        {
+            answersAnswered++;
+            rightAnswers++;
+            _user.Score += Math.Round(5 * timerFrontEnd, 0);
+            message = new() { Severity = NotificationSeverity.Success, Summary = "Right Answer", Duration = 1000 };
+        }
+        else
+        {
+            answersAnswered++;
+            wrongAnswers++;
+            message = new() { Severity = NotificationSeverity.Error, Summary = "Wrong Answer", Duration = 1000 };
+        }
+        if(answersAnswered == maxQuestions)
+        {
+            data.UserList.Where(x => x.UserName == _user.UserName).First().Finished = true;
+            if (data.UserList.Where(x => x.UserName == _user.UserName).First().Finished && data.UserList.Where(x => x.UserName != _user.UserName && x.Lobby == _user.Lobby).First().Finished)
+            {
+                SetPlace();
+                finished = true;
+                elapsedTime?.Dispose();
+            }
+
+        }
+        NotificationService.Notify(message);
+        GetData();
+    }
+
+    void SetPlace()
+    {
+        place = data.UserList.Where(x => x.Lobby == _user.Lobby).OrderByDescending(x => x.Score).ToList().FindIndex(x=> x.UserName == _user.UserName)+1;
     }
 
     string GetRandomAnswer()
@@ -62,16 +143,48 @@
         string wrongAnswer2 = "999.999.999.999";
         string wrongAnswer3 = "300.ABCD.1234.FFF";
         answers = new List<string> { rightAnswer, wrongAnswer1, wrongAnswer2, wrongAnswer3 };
+        answer1 = GetRandomAnswer();
+        answer2 = GetRandomAnswer();
+        answer3 = GetRandomAnswer();
+        answer4 = GetRandomAnswer();
     }
 
     void StartTimer()
     {
-        timer = new System.Timers.Timer(1000);
-        timer.Elapsed += CountDownTimer;
-        timer.Enabled = true;
+        timer = new System.Threading.Timer(async _ =>  // async void
+        {
+            await CountDownTimer();
+            await InvokeAsync(StateHasChanged);
+        }, null, 0, 1000);
     }
 
-    void CountDownTimer(Object? source, System.Timers.ElapsedEventArgs e)
+    void StartElapsedTimer()
+    {
+        elapsedTime =
+        timer = new System.Threading.Timer(async _ =>  // async void
+        {
+            await CountDownElapsedTimer();
+            await InvokeAsync(StateHasChanged);
+        }, null, 0, 1000);
+    }
+
+    async Task CountDownElapsedTimer()
+    {
+        if (timerFrontEnd > 0)
+        {
+            timerFrontEnd -= 1;
+        }
+        else
+        {
+            finished = true;
+            SetPlace();
+            data.UserList.Where(x => x.UserName == _user.UserName).First().Finished = true;
+            elapsedTime?.Dispose();
+        }
+        await Task.CompletedTask;
+    }
+
+    async Task CountDownTimer()
     {
         if (counter > 0)
         {
@@ -87,16 +200,19 @@
         }
         else
         {
+            timer?.Dispose();
             countdown = false;
             GetData();
-            timer.Enabled = false;
+            StartElapsedTimer();
         }
-        StateHasChanged();
+        await Task.CompletedTask;
     }
 
     public void Dispose()
     {
         data.UserList.Where(x => x.UserName == _user.UserName).First().Lobby = 0;
         data.UserList.Where(x => x.UserName == _user.UserName).First().Game = "";
+        data.UserList.Where(x => x.UserName == _user.UserName).First().Score = 0;
+        data.UserList.Where(x => x.UserName == _user.UserName).First().Finished = false;
     }
 }
