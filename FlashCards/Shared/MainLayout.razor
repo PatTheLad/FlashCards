@@ -93,7 +93,7 @@
 
     void OnLogin(LoginArgs args)
     {
-        if (data.UserList.Where(x => x.UserName.ToUpper() == args.Username.ToUpper()).Count() > 0)
+        if (data.UserList.Where(x => x.UserName?.ToUpper() == args.Username.ToUpper()).Count() > 0)
         {
             NotificationService.Notify(new() { Severity = NotificationSeverity.Error, Summary = "Login Error", Detail = "A user with the same username is already logged in! If you think your account got compromised please reset your password!", Duration = 20000 });
         }

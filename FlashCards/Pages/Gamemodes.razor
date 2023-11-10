@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject User _user
 @inject Data data
+@inject DialogService DialogService
 @implements IDisposable
 
 <PageTitle>Gamemodes</PageTitle>
@@ -51,6 +52,14 @@
 </RadzenRow>
 
 @code{
+    bool cancelSearch = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        data.UserList.Where(x => x.UserName == _user.UserName).First().Finished = false;
+        return base.OnInitializedAsync();
+    }
+
     async void OnGameSelection(string gameName)
     {
         _user.Game = gameName;
@@ -58,34 +67,61 @@
         _user.Lobby = 0;
         data.UserList.RemoveAll(x => x.UserName == _user.UserName);
         data.UserList.Add(_user);
-        await SearchForLobby(gameName);
+        ShowBusyDialog();
+        SearchForLobby(gameName);
         StateHasChanged();
+    }
+
+    async Task ShowBusyDialog()
+    {
+        InvokeAsync(async () =>
+        {
+            await Task.Delay(5);
+        });
+        await DialogService.OpenAsync("", ds =>
+            @<RadzenStack AlignItems="AlignItems.Center" Gap="2rem" Class="rz-p-12">
+                <RadzenStack Style="width:100%" AlignItems="AlignItems.Center">
+                    <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
+                </RadzenStack>
+                <RadzenText TextStyle="TextStyle.H6">Searching for a lobby, please wait...</RadzenText>
+                <RadzenButton Style="width:100%" ButtonStyle="ButtonStyle.Danger" Text="Cancel Search" Icon="close" Click="@(() => {cancelSearch = true; ds.Close();})"/>
+            </RadzenStack>, new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
     }
 
     async Task SearchForLobby(string gameName)
     {
+        await Task.Delay(15);
         bool lobbyFound = false;
         while (!lobbyFound)
         {
-            if(data.UserList.Where(x => x.Game == gameName && x.Lobby == 0).Count() > 1)
+            if(!cancelSearch)
             {
-                _user.Lobby = data.UserList.Select(x => x.Lobby).Max()+1;
-                data.UserList.RemoveAll(x => x.UserName == _user.UserName);
-                data.UserList.Add(_user);
-                data.UserList.Where(x => x.Game == gameName && x.UserName != _user.UserName && x.Lobby == 0).First().Lobby = _user.Lobby;
-                lobbyFound = true;
-                await NavigateToGame(gameName);
-            }
-            else
-            {
-                _user.Lobby = data.UserList.Where(x => x.UserName == _user.UserName).First().Lobby;
-                if(_user.Lobby != 0)
+                if(data.UserList.Where(x => x.Game == gameName && x.Lobby == 0).Count() > 1)
                 {
+                    _user.Lobby = data.UserList.Select(x => x.Lobby).Max()+1;
                     data.UserList.RemoveAll(x => x.UserName == _user.UserName);
                     data.UserList.Add(_user);
+                    data.UserList.Where(x => x.Game == gameName && x.UserName != _user.UserName && x.Lobby == 0).First().Lobby = _user.Lobby;
                     lobbyFound = true;
                     await NavigateToGame(gameName);
                 }
+                else
+                {
+                    _user.Lobby = data.UserList.Where(x => x.UserName == _user.UserName).First().Lobby;
+                    if(_user.Lobby != 0)
+                    {
+                        data.UserList.RemoveAll(x => x.UserName == _user.UserName);
+                        data.UserList.Add(_user);
+                        lobbyFound = true;
+                        await NavigateToGame(gameName);
+                    }
+                }
+            }
+            else
+            {
+                _user.Game = null;
+                data.UserList.Where(x => x.UserName == _user.UserName).First().Game = null;
+                lobbyFound = true;
             }
             Thread.Sleep(100);
         }
@@ -114,3 +150,4 @@
         data.UserList.Where(x => x.UserName == _user.UserName).First().Game = "";
     }
 }
+

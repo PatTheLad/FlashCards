@@ -99,13 +99,13 @@
             answersAnswered++;
             rightAnswers++;
             _user.Score += Math.Round(5 * timerFrontEnd, 0);
-            message = new() { Severity = NotificationSeverity.Success, Summary = "Right Answer", Detail = "Great job!", Duration = 2000 };
+            message = new() { Severity = NotificationSeverity.Success, Summary = "Right Answer", Duration = 1000 };
         }
         else
         {
             answersAnswered++;
             wrongAnswers++;
-            message = new() { Severity = NotificationSeverity.Error, Summary = "Wrong Answer", Detail = "Good luck next time!", Duration = 2000 };
+            message = new() { Severity = NotificationSeverity.Error, Summary = "Wrong Answer", Duration = 1000 };
         }
         if(answersAnswered == maxQuestions)
         {
@@ -165,14 +165,14 @@
         {
             await CountDownElapsedTimer();
             await InvokeAsync(StateHasChanged);
-        }, null, 0, 10);
+        }, null, 0, 1000);
     }
 
     async Task CountDownElapsedTimer()
     {
         if (timerFrontEnd > 0)
         {
-            timerFrontEnd -= 0.01;
+            timerFrontEnd -= 1;
         }
         else
         {
