@@ -84,7 +84,7 @@
             </RadzenStack>, new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
     }
 
-    void SearchForLobby(string gameName)
+    async void SearchForLobby(string gameName)
     {
         bool lobbyFound = false;
         while (!lobbyFound)
@@ -98,7 +98,7 @@
                     data.UserList.Add(_user);
                     data.UserList.Where(x => x.Game == gameName && x.UserName != _user.UserName && x.Lobby == 0).First().Lobby = _user.Lobby;
                     lobbyFound = true;
-                    NavigateToGame(gameName);
+                    await NavigateToGame(gameName);
                 }
                 else
                 {
@@ -108,7 +108,7 @@
                         data.UserList.RemoveAll(x => x.UserName == _user.UserName);
                         data.UserList.Add(_user);
                         lobbyFound = true;
-                        NavigateToGame(gameName);
+                        await NavigateToGame(gameName);
                     }
                 }
             }
