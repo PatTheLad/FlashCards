@@ -68,17 +68,13 @@
         data.UserList.RemoveAll(x => x.UserName == _user.UserName);
         data.UserList.Add(_user);
         ShowBusyDialog();
-        SearchForLobby(gameName);
+        await Task.Run(() => {SearchForLobby(gameName);});
         StateHasChanged();
     }
 
-    async Task ShowBusyDialog()
+    void ShowBusyDialog()
     {
-        InvokeAsync(async () =>
-        {
-            await Task.Delay(5);
-        });
-        await DialogService.OpenAsync("", ds =>
+        DialogService.OpenAsync("", ds =>
             @<RadzenStack AlignItems="AlignItems.Center" Gap="2rem" Class="rz-p-12">
                 <RadzenStack Style="width:100%" AlignItems="AlignItems.Center">
                     <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
@@ -88,9 +84,8 @@
             </RadzenStack>, new DialogOptions() { ShowTitle = false, Style = "min-height:auto;min-width:auto;width:auto", CloseDialogOnEsc = false });
     }
 
-    async Task SearchForLobby(string gameName)
+    void SearchForLobby(string gameName)
     {
-        await Task.Delay(15);
         bool lobbyFound = false;
         while (!lobbyFound)
         {
@@ -103,7 +98,7 @@
                     data.UserList.Add(_user);
                     data.UserList.Where(x => x.Game == gameName && x.UserName != _user.UserName && x.Lobby == 0).First().Lobby = _user.Lobby;
                     lobbyFound = true;
-                    await NavigateToGame(gameName);
+                    NavigateToGame(gameName);
                 }
                 else
                 {
@@ -113,7 +108,7 @@
                         data.UserList.RemoveAll(x => x.UserName == _user.UserName);
                         data.UserList.Add(_user);
                         lobbyFound = true;
-                        await NavigateToGame(gameName);
+                        NavigateToGame(gameName);
                     }
                 }
             }
@@ -122,10 +117,10 @@
                 _user.Game = null;
                 data.UserList.Where(x => x.UserName == _user.UserName).First().Game = null;
                 lobbyFound = true;
+                cancelSearch = false;
             }
             Thread.Sleep(100);
         }
-        await Task.CompletedTask;
     }
 
     async Task NavigateToGame(string gameName)
