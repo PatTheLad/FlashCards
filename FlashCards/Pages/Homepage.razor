@@ -1,6 +1,75 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Authentication
+@inject IJSRuntime js
 
 <PageTitle>Home</PageTitle>
 
-<h1>Welcome to Flashcards</h1>
+<RadzenRow>
+    <RadzenStack Gap="0" Class="rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="height: 80vh; width: 100%; max-width: 1600px; overflow: hidden;">
+        <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-background-color-info rz-p-12" style="text-align: center; vertical-align:central">
+            <RadzenText TextStyle="TextStyle.DisplayH3" TagName="TagName.H2" Class="rz-color-white rz-mb-0">
+                Welcome to FlashCards
+            </RadzenText>
+        </RadzenCard>
+        <RadzenCard Class="rz-shadow-0 rz-p-12" Style="text-align:center;">
+            <RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="Last games">
+                        <RadzenChart>
+                            <RadzenLineSeries Smooth Data="@scores" ValueProperty="Score" CategoryProperty="TimeStamp" Title="Score" LineType="LineType.Dashed">
+                                <RadzenMarkers MarkerType="MarkerType.Square" />
+                            </RadzenLineSeries>
+                        </RadzenChart>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="News">
+                        <RadzenRow Style="height:50vh; overflow-y:auto">
+                            <RadzenCard>
+                                <RadzenText TextAlign="TextAlign.Center" Text="New Coop gamemode!" TextStyle="TextStyle.H5"/>
+                                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Text="@placeHolder"/>   
+                                <RadzenText TextAlign="TextAlign.End" TextStyle="TextStyle.Subtitle2" Text="@(DateTime.Now.ToString())"/>                     
+                            </RadzenCard>
+                            <RadzenCard>
+                                <RadzenText TextAlign="TextAlign.Center" Text="Added Leaderboard" TextStyle="TextStyle.H5"/>
+                                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Text="@placeHolder"/> 
+                                <RadzenText TextAlign="TextAlign.End" TextStyle="TextStyle.Subtitle2" Text="@(DateTime.Now.ToString())"/>                         
+                            </RadzenCard>
+                            <RadzenCard>
+                                <RadzenText TextAlign="TextAlign.Center" Text="@("Welcome to Version " + Math.PI)" TextStyle="TextStyle.H5"/>
+                                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Text="@placeHolder"/>
+                                <RadzenText TextAlign="TextAlign.End" TextStyle="TextStyle.Subtitle2" Text="@(DateTime.Now.ToString())"/>                          
+                            </RadzenCard>
+                            <RadzenCard>
+                                <RadzenText TextAlign="TextAlign.Center" Text="Test" TextStyle="TextStyle.H5"/>
+                                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Text="@placeHolder"/>
+                                <RadzenText TextAlign="TextAlign.End" TextStyle="TextStyle.Subtitle2" Text="@(DateTime.Now.ToString())"/>                          
+                            </RadzenCard>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Coming Soon">
+                        <RadzenRow Style="height:50vh; overflow-y:auto">
+                            <RadzenCard>
+                                <RadzenText TextAlign="TextAlign.Center" Text="More gamemodes" TextStyle="TextStyle.H5"/>
+                                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Text="@placeHolder"/>
+                                <RadzenText TextAlign="TextAlign.End" TextStyle="TextStyle.Subtitle2" Text="@(DateTime.Now.ToString())"/>  
+                            </RadzenCard>
+                            <RadzenCard>
+                                <RadzenText TextAlign="TextAlign.Center" Text="Friend system" TextStyle="TextStyle.H5"/>
+                                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.Body1" Text="@placeHolder"/>
+                                <RadzenText TextAlign="TextAlign.End" TextStyle="TextStyle.Subtitle2" Text="@(DateTime.Now.ToString())"/>  
+                            </RadzenCard>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </RadzenCard>
+    </RadzenStack>
+</RadzenRow>
+
+@code{
+    string placeHolder = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    public List<ScoreTimeStamp> scores = new(){new ScoreTimeStamp{Score = 40, TimeStamp = DateTime.Now}, new ScoreTimeStamp{Score = 230, TimeStamp = DateTime.Now.AddDays(-4)}, new ScoreTimeStamp{Score = 10, TimeStamp = DateTime.Now.AddHours(-3)}, new ScoreTimeStamp{Score = 110, TimeStamp = DateTime.Now.AddDays(-1)}};
+
+    public class ScoreTimeStamp{
+        public int Score { get; set; }
+        public DateTime TimeStamp { get; set; }
+    }
+}
