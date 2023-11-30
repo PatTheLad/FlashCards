@@ -1,6 +1,7 @@
 ﻿@page "/gamemodes/race"
 @implements IDisposable
 @using FlashCards.Model
+@using FlashCards.Service
 @inject User _user
 @inject Data data
 @inject NotificationService NotificationService
@@ -119,7 +120,7 @@
 
         }
         NotificationService.Notify(message);
-        GetData();
+        LoadData();
     }
 
     void SetPlace()
@@ -135,14 +136,12 @@
         return answer;
     }
 
-    void GetData()
+    void LoadData()
     {
-        question = "What of the following choices represents an IPv4 adress?";
-        rightAnswer = "192.168.178.1";
-        string wrongAnswer1 = "A2D4A6B7";
-        string wrongAnswer2 = "999.999.999.999";
-        string wrongAnswer3 = "300.ABCD.1234.FFF";
-        answers = new List<string> { rightAnswer, wrongAnswer1, wrongAnswer2, wrongAnswer3 };
+        FlashCard flashCard = GetData.GetRandomFlashCard().Result;
+        question = flashCard.Question;
+        rightAnswer = flashCard.RightAnswer;
+        answers = new List<string> { flashCard.RightAnswer, flashCard.WrongAnswer1, flashCard.WrongAnswer2, flashCard.WrongAnswer3 };
         answer1 = GetRandomAnswer();
         answer2 = GetRandomAnswer();
         answer3 = GetRandomAnswer();
@@ -202,7 +201,7 @@
         {
             timer?.Dispose();
             countdown = false;
-            GetData();
+            LoadData();
             StartElapsedTimer();
         }
         await Task.CompletedTask;

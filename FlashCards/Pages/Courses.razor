@@ -1,0 +1,61 @@
+@page "/courses"
+@using FlashCards.Model
+@using FlashCards.Service
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>Courses</PageTitle>
+
+<RadzenDataGrid TItem="Course" AllowFiltering AllowColumnResize FilterMode="FilterMode.SimpleWithMenu" AllowSorting Data="courses" Style="width:100%; height:100%">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Style="width:99vw;">
+            <RadzenButton Text="Add course" Icon="add" Click="AddCourse"/>
+        </RadzenStack>
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="Course" Property="Id" Title="Id"/>
+        <RadzenDataGridColumn TItem="Course" Property="CourseAbbreviation" Title="Name"/>
+        <RadzenDataGridColumn TItem="Course" Property="CourseName" Title="Abbreviation"/>
+    </Columns>
+</RadzenDataGrid>
+
+@code{
+    List<Course> courses = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        courses = GetData.GetCourses().Result;
+        return base.OnInitializedAsync();
+    }
+
+    async Task AddCourse()
+    {
+        Course course = new();
+        bool add = false;
+        await DialogService.OpenAsync("Add Course", ds =>
+        @<div>
+            <RadzenFormField Text="Name" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@course.CourseName" @oninput="(x => {course.CourseName = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenFormField Text="Abbreviation" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@course.CourseAbbreviation" @oninput="(x => {course.CourseAbbreviation = x.Value.ToString(); ds.Refresh();})" />
+            </RadzenFormField>
+            <RadzenButton Disabled="@(!Validator(course).Result)" Style="width:100%; margin-top:2vh" Click="(() => {add = true; ds.Close();})" Text="Add Course" Icon="add"/>
+        </div>, new DialogOptions() { CloseDialogOnOverlayClick = true });
+        if(Validator(course).Result && add)
+        {
+            await SetData.SetCourse(course);
+            NotificationService.Notify(new() { Severity = NotificationSeverity.Success, Summary = "Added Course", Duration = 3000 });
+        }
+    }
+
+    async Task<bool> Validator(Course course)
+    {
+        bool valid = false;
+        if(!(String.IsNullOrEmpty(course.CourseName) || String.IsNullOrEmpty(course.CourseAbbreviation)))
+        {
+            valid = true;
+        }
+        return valid;
+    }
+}

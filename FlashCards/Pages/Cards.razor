@@ -1,0 +1,78 @@
+@page "/cards"
+@using FlashCards.Model
+@using FlashCards.Service
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>Cards</PageTitle>
+
+<RadzenDataGrid TItem="FlashCard" AllowFiltering AllowColumnResize FilterMode="FilterMode.SimpleWithMenu" AllowSorting Data="cards" Style="width:100%; height:100%">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Style="width:99vw;">
+            <RadzenButton Text="Add card" Icon="add" Click="AddCard"/>
+        </RadzenStack>
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="FlashCard" Property="Id" Title="Id"/>
+        <RadzenDataGridColumn TItem="FlashCard" Property="Question" Title="Question"/>
+        <RadzenDataGridColumn TItem="FlashCard" Property="RightAnswer" Title="RightAnswer"/>
+        <RadzenDataGridColumn TItem="FlashCard" Property="WrongAnswer1" Title="WrongAnswer1"/>
+        <RadzenDataGridColumn TItem="FlashCard" Property="WrongAnswer2" Title="WrongAnswer2"/>
+        <RadzenDataGridColumn TItem="FlashCard" Property="WrongAnswer3" Title="WrongAnswer3"/>
+    </Columns>
+</RadzenDataGrid>
+
+@code{
+    List<FlashCard> cards = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        cards = GetData.GetFlashCards().Result;
+        return base.OnInitializedAsync();
+    }
+    
+    async Task AddCard()
+    {
+        FlashCard flashCard = new();
+        bool add = false;
+        await DialogService.OpenAsync("Add Course", ds =>
+        @<div>
+            <RadzenFormField Text="Question" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@flashCard.Question" @oninput="(x => {flashCard.Question = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenFormField Text="Explanation" Style="width: 100%;">
+                <RadzenTextArea Style="width: 100%;" Value="@flashCard.Explanation" @oninput="(x => {flashCard.Explanation = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenFormField Text="RightAnswer" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@flashCard.RightAnswer" @oninput="(x => {flashCard.RightAnswer = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenFormField Text="WrongAnswer1" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@flashCard.WrongAnswer1" @oninput="(x => {flashCard.WrongAnswer1 = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenFormField Text="WrongAnswer2" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@flashCard.WrongAnswer2" @oninput="(x => {flashCard.WrongAnswer2 = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenFormField Text="WrongAnswer3" Style="width: 100%;">
+                <RadzenTextBox Style="width: 100%;" Value="@flashCard.WrongAnswer3" @oninput="(x => {flashCard.WrongAnswer3 = x.Value.ToString(); ds.Refresh();})"/>
+            </RadzenFormField>
+            <RadzenButton Disabled="@(!Validator(flashCard).Result)" Style="width:100%; margin-top:2vh" Click="(() => {add = true; ds.Close();})" Text="Add Course" Icon="add"/>
+        </div>, new DialogOptions() { CloseDialogOnOverlayClick = true });
+        if(Validator(flashCard).Result && add)
+        {
+            await SetData.SetFlashCard(flashCard);
+            NotificationService.Notify(new() { Severity = NotificationSeverity.Success, Summary = "Added FlashCard", Duration = 3000 });
+        }
+    }
+
+    async Task<bool> Validator(FlashCard flashCard)
+    {
+        bool valid = false;
+        if(!(String.IsNullOrEmpty(flashCard.Question) || String.IsNullOrEmpty(flashCard.Explanation) || String.IsNullOrEmpty(flashCard.RightAnswer) || 
+        String.IsNullOrEmpty(flashCard.WrongAnswer1) || String.IsNullOrEmpty(flashCard.WrongAnswer2) || String.IsNullOrEmpty(flashCard.WrongAnswer3)))
+        {
+            valid = true;
+        }
+        await Task.CompletedTask;
+        return valid;
+    }
+}
